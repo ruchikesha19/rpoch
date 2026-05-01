@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Volunteer Registration | FeedNet</title>
+  <meta name="description" content="Create a FeedNet volunteer account. Start earning reward points by delivering surplus food to those in need.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "sans-serif"] },
+          colors: {
+            ocean: { 50: "#f5fbff", 100: "#e6f6ff", 300: "#91d8ff", 600: "#1588d6", 800: "#15557d", 950: "#102f48" },
+            mint: { 100: "#e9fbf4", 500: "#22b887", 700: "#13765b" },
+            coral: "#ff7a59",
+            honey: "#f4b740"
+          },
+          boxShadow: { soft: "0 24px 70px rgba(21, 136, 214, 0.16)" }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body class="bg-ocean-50 font-sans text-ocean-950 antialiased">
+  <div class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_10%_0%,rgba(145,216,255,.35),transparent_34%),linear-gradient(180deg,#f5fbff_0%,#ffffff_44%,#f7fcff_100%)]"></div>
+
+  <header class="sticky top-0 z-40 mx-auto flex w-[min(1180px,calc(100%_-_32px))] items-center justify-between gap-4 py-4 backdrop-blur-xl max-lg:static max-lg:flex-col">
+    <a href="index.html" class="flex items-center gap-3 font-black text-ocean-950">
+      <span class="grid h-11 w-11 place-items-center rounded-lg bg-gradient-to-br from-ocean-600 to-mint-500 text-sm font-black text-white shadow-lg shadow-ocean-600/20">FN</span>
+      <span>FeedNet</span>
+    </a>
+    <nav class="flex items-center gap-2 text-sm font-extrabold">
+      <a class="rounded-md border border-ocean-100 bg-white/80 px-4 py-2.5 text-ocean-800 shadow-sm transition hover:bg-ocean-100" href="login-volunteer.html">Login</a>
+      <a class="rounded-md border border-ocean-100 bg-white/80 px-4 py-2.5 text-ocean-800 shadow-sm transition hover:bg-ocean-100" href="register-restaurant.html">Restaurant Register</a>
+    </nav>
+  </header>
+
+  <main class="mx-auto grid min-h-[calc(100vh_-_96px)] w-[min(1080px,calc(100%_-_32px))] grid-cols-[.8fr_1.2fr] items-start gap-6 py-8 max-lg:grid-cols-1">
+    <section class="animate-rise rounded-lg border border-ocean-100 bg-white/90 p-6 shadow-soft">
+      <div class="mb-4 grid h-14 w-14 place-items-center rounded-lg bg-gradient-to-br from-mint-500 to-ocean-600 text-xl font-black text-white shadow-lg shadow-mint-500/20">
+        <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <p class="mb-3 text-xs font-black uppercase tracking-[.14em] text-mint-700">Join the network</p>
+      <h1 class="text-4xl font-black leading-tight text-ocean-950 max-sm:text-3xl">Become a volunteer and make a difference.</h1>
+      <p class="mt-3 leading-7 text-slate-600">Register to start accepting pickup routes, earn reward points for every delivery, and help bridge the gap between surplus food and those in need.</p>
+      <div class="mt-6 grid gap-3">
+        <article class="rounded-lg bg-mint-100 p-4">
+          <span class="text-sm font-black text-mint-700">What you get</span>
+          <ul class="mt-2 grid gap-1 text-sm font-bold text-slate-600">
+            <li>✓ Real-time pickup dashboard</li>
+            <li>✓ Reward points for every delivery</li>
+            <li>✓ Nearby restaurant discovery</li>
+            <li>✓ Community coordination chat</li>
+          </ul>
+        </article>
+        <div class="rounded-lg bg-ocean-100 p-4 text-sm font-bold leading-6 text-slate-600">
+          Already have an account? <a class="font-black text-ocean-800" href="login-volunteer.html">Login here</a>.
+        </div>
+      </div>
+    </section>
+
+    <section class="animate-float-in rounded-lg border border-ocean-100 bg-white/90 p-6 shadow-soft">
+      <h2 class="text-2xl font-black text-ocean-950">Create Volunteer Account</h2>
+      <p class="mt-2 text-sm leading-6 text-slate-600">Fill in your details to get started. All fields are required.</p>
+      <form class="mt-5 grid gap-4" data-auth-form data-role="volunteer">
+        <label class="grid gap-2 text-sm font-black text-ocean-950">Full name
+          <input class="field" name="name" type="text" placeholder="Aarav Sharma" required>
+        </label>
+        <label class="grid gap-2 text-sm font-black text-ocean-950">Mobile number
+          <input class="field" name="mobile" type="tel" placeholder="+91 98765 43210" required>
+        </label>
+        <label class="grid gap-2 text-sm font-black text-ocean-950">Aadhar card number
+          <input class="field" name="aadhar" type="text" placeholder="1234 5678 9012" maxlength="14" required>
+        </label>
+        <label class="grid gap-2 text-sm font-black text-ocean-950">Email
+          <input class="field" name="email" type="email" placeholder="aarav@example.com" required>
+        </label>
+        <label class="grid gap-2 text-sm font-black text-ocean-950">Password
+          <input class="field" name="password" type="password" placeholder="Create a password" minlength="6" required>
+        </label>
+        <label class="grid gap-2 text-sm font-black text-ocean-950">Profile picture
+          <input class="field file:mr-4 file:rounded-md file:border-0 file:bg-ocean-100 file:px-3 file:py-2 file:font-black file:text-ocean-800" name="profile" type="file" accept="image/*">
+        </label>
+        <label class="flex items-start gap-3 text-sm font-bold text-slate-600">
+          <input class="mt-1 h-5 w-5 accent-mint-500" type="checkbox" required>
+          <span>I confirm that I am over 18 years old and agree to the platform terms.</span>
+        </label>
+        <button class="submit-button" type="submit">Create volunteer account</button>
+      </form>
+      <div class="mt-5 rounded-lg border border-ocean-100 p-4 text-center text-sm font-bold text-slate-500">
+        Are you a restaurant? <a class="font-black text-ocean-800" href="register-restaurant.html">Register here instead</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

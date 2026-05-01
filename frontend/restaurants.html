@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurants | FeedNet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "sans-serif"] },
+          colors: {
+            ocean: { 50: "#f5fbff", 100: "#e6f6ff", 300: "#91d8ff", 600: "#1588d6", 800: "#15557d", 950: "#102f48" },
+            mint: { 100: "#e9fbf4", 500: "#22b887", 700: "#13765b" },
+            coral: "#ff7a59",
+            honey: "#f4b740"
+          },
+          boxShadow: { soft: "0 24px 70px rgba(21, 136, 214, 0.16)" }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body class="bg-ocean-50 font-sans text-ocean-950 antialiased">
+  <div class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_10%_0%,rgba(145,216,255,.35),transparent_34%),linear-gradient(180deg,#f5fbff_0%,#ffffff_44%,#f7fcff_100%)]"></div>
+
+  <header class="sticky top-0 z-40 mx-auto flex w-[min(1180px,calc(100%_-_32px))] items-center justify-between gap-4 py-4 backdrop-blur-xl max-lg:static max-lg:flex-col">
+    <a href="index.html" class="flex items-center gap-3 font-black text-ocean-950">
+      <span class="grid h-11 w-11 place-items-center rounded-lg bg-gradient-to-br from-ocean-600 to-mint-500 text-sm font-black text-white shadow-lg shadow-ocean-600/20">FN</span>
+      <span>FeedNet</span>
+    </a>
+    <nav class="role-nav">
+      <a class="role-nav-link active" href="restaurants.html">Restaurant</a>
+      <a class="role-nav-link" href="community.html">Community</a>
+      <button class="role-nav-link" data-logout type="button">Logout</button>
+    </nav>
+  </header>
+
+  <main class="mx-auto w-[min(1180px,calc(100%_-_32px))] py-8">
+    <section class="grid grid-cols-[.78fr_1.22fr] gap-6 max-lg:grid-cols-1">
+      <aside class="animate-rise rounded-lg border border-ocean-100 bg-white/90 p-6 shadow-soft">
+        <p class="mb-3 text-xs font-black uppercase tracking-[.14em] text-mint-700">Restaurant portal</p>
+        <h1 class="text-4xl font-black leading-tight text-ocean-950 max-sm:text-3xl">List surplus food and track every match.</h1>
+        <p class="mt-3 leading-7 text-slate-600">Manage surplus food, route distance, match status, and reward points from one focused dashboard.</p>
+        <div class="mt-6 grid grid-cols-2 gap-3">
+          <article class="rounded-lg bg-ocean-100 p-4">
+            <span class="text-sm font-black text-slate-500">Active listings</span>
+            <strong class="mt-2 block text-3xl font-black text-ocean-950" data-stat="restaurantListings">2</strong>
+          </article>
+          <article class="rounded-lg bg-mint-100 p-4">
+            <span class="text-sm font-black text-slate-500">Meals donated</span>
+            <strong class="mt-2 block text-3xl font-black text-ocean-950" data-stat="restaurantMeals">1280</strong>
+          </article>
+          <article class="rounded-lg bg-white p-4">
+            <span class="text-sm font-black text-slate-500">Today</span>
+            <strong class="mt-2 block text-3xl font-black text-ocean-950" data-stat="todayContributions">0</strong>
+          </article>
+          <article class="rounded-lg bg-white p-4">
+            <span class="text-sm font-black text-slate-500">Km logged</span>
+            <strong class="mt-2 block text-3xl font-black text-ocean-950" data-stat="rewardKm">0.0</strong>
+          </article>
+        </div>
+      </aside>
+
+      <section class="animate-float-in rounded-lg border border-ocean-100 bg-white/90 p-6 shadow-soft">
+        <div class="flex items-start justify-between gap-4 max-sm:flex-col">
+          <div>
+            <p class="mb-3 text-xs font-black uppercase tracking-[.14em] text-mint-700">Restaurant console</p>
+            <h2 class="text-4xl font-black leading-tight text-ocean-950 max-sm:text-3xl">Quick add leftover food</h2>
+          </div>
+          <span class="rounded-full bg-mint-100 px-3 py-1 text-xs font-black text-mint-700">Live matching</span>
+        </div>
+
+        <form class="mt-6 grid grid-cols-[1fr_.5fr_.6fr_.45fr_.45fr_auto] items-end gap-3 rounded-lg bg-ocean-100 p-5 max-xl:grid-cols-3 max-sm:grid-cols-1" id="quick-add-form">
+          <label class="grid gap-2 text-sm font-black text-ocean-950">Food item<input class="field" name="food" type="text" placeholder="Vegetable biryani" required></label>
+          <label class="grid gap-2 text-sm font-black text-ocean-950">Servings<input class="field" name="servings" type="number" placeholder="40" min="1" required></label>
+          <label class="grid gap-2 text-sm font-black text-ocean-950">Pickup window<input class="field" name="pickup" type="time" required></label>
+          <label class="grid gap-2 text-sm font-black text-ocean-950">Km<input class="field" name="distanceKm" type="number" placeholder="20" min="0.1" step="0.1" required></label>
+          <label class="grid gap-2 text-sm font-black text-ocean-950">Hours<input class="field" name="durationHours" type="number" placeholder="1" min="0.1" step="0.1" required></label>
+          <button class="submit-button h-12 px-5" type="submit">Add listing</button>
+        </form>
+
+        <div class="mt-5 grid gap-3" id="restaurant-listings">
+          <article class="lift-card flex items-center justify-between gap-4 rounded-lg border border-ocean-100 bg-white p-5 max-sm:flex-col max-sm:items-start">
+            <div>
+              <span class="rounded-full bg-ocean-100 px-3 py-1 text-xs font-black text-ocean-800">Matching</span>
+              <h3 class="mt-3 text-lg font-black text-ocean-950">40 veg biryani servings</h3>
+              <p class="mt-1 text-slate-600">Priority score 94 - 3 NGOs eligible - pickup ETA 18 min</p>
+            </div>
+            <button class="outline-button" data-manage-listing type="button">Manage</button>
+          </article>
+          <article class="lift-card flex items-center justify-between gap-4 rounded-lg border border-ocean-100 bg-white p-5 max-sm:flex-col max-sm:items-start">
+            <div>
+              <span class="rounded-full bg-mint-100 px-3 py-1 text-xs font-black text-mint-700">Accepted</span>
+              <h3 class="mt-3 text-lg font-black text-ocean-950">18 bakery packs</h3>
+              <p class="mt-1 text-slate-600">Volunteer assigned - route shared - NGO delivery pending</p>
+            </div>
+            <button class="outline-button" data-manage-listing type="button">Track</button>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section class="mt-6 grid grid-cols-[1.1fr_.9fr] gap-6 max-lg:grid-cols-1">
+      <article class="rounded-lg border border-ocean-100 bg-white/90 p-6 shadow-soft">
+        <div class="flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-start">
+          <div>
+            <p class="mb-3 text-xs font-black uppercase tracking-[.14em] text-mint-700">Restaurant activity</p>
+            <h2 class="text-3xl font-black text-ocean-950">Donation performance chart</h2>
+          </div>
+          <div class="flex rounded-lg bg-ocean-100 p-1">
+            <button class="chart-toggle rounded-md bg-white px-3 py-2 text-sm font-black text-ocean-950" data-chart-target="restaurant-chart" data-chart-values="42,55,38,66,72,61,85" type="button">Servings</button>
+            <button class="chart-toggle rounded-md px-3 py-2 text-sm font-black text-slate-500" data-chart-target="restaurant-chart" data-chart-values="2,3,2,4,5,4,6" type="button">Listings</button>
+          </div>
+        </div>
+        <div class="bar-chart mt-7" id="restaurant-chart" aria-label="Restaurant weekly activity chart">
+          <span style="--value:49%"><b>42</b><em>Mon</em></span>
+          <span style="--value:65%"><b>55</b><em>Tue</em></span>
+          <span style="--value:45%"><b>38</b><em>Wed</em></span>
+          <span style="--value:78%"><b>66</b><em>Thu</em></span>
+          <span style="--value:85%"><b>72</b><em>Fri</em></span>
+          <span style="--value:72%"><b>61</b><em>Sat</em></span>
+          <span style="--value:100%"><b>85</b><em>Sun</em></span>
+        </div>
+      </article>
+
+      <article class="rounded-lg border border-ocean-100 bg-white/90 p-6 shadow-soft">
+        <p class="mb-3 text-xs font-black uppercase tracking-[.14em] text-mint-700">Reward system</p>
+        <h2 class="text-3xl font-black text-ocean-950">Contribution points</h2>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Log completed donation routes to grow your contribution history. A 1 hour, 20 km route earns 50 points.</p>
+        <form class="mt-5 grid gap-3 rounded-lg bg-ocean-100 p-4" data-reward-form data-reward-role="restaurant">
+          <input class="field" name="title" type="text" placeholder="Donation route title" required>
+          <div class="grid grid-cols-3 gap-3 max-sm:grid-cols-1">
+            <input class="field" name="meals" type="number" min="1" placeholder="Servings" required>
+            <input class="field" name="distanceKm" type="number" min="0.1" step="0.1" placeholder="Km" required>
+            <input class="field" name="durationHours" type="number" min="0.1" step="0.1" placeholder="Hours" required>
+          </div>
+          <button class="submit-button" type="submit">Log route</button>
+        </form>
+        <div class="mt-4 grid gap-3" data-reward-history></div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

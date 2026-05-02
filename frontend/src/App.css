@@ -1,0 +1,240 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5fbff 0%, #ffffff 44%, #f7fcff 100%);
+}
+
+/* Custom animations */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.6s ease-out;
+}
+
+.animate-float-in {
+  animation: float-in 0.8s ease-out;
+}
+
+/* Lift card effect */
+.lift-card {
+  transition: all 0.3s ease;
+}
+
+.lift-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(21, 136, 214, 0.15);
+}
+
+/* Custom button styles */
+.submit-button {
+  background: linear-gradient(to right, #1588d6, #22b887);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 900;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 24px 70px rgba(21, 136, 214, 0.16);
+}
+
+.submit-button:hover {
+  box-shadow: 0 10px 25px rgba(21, 136, 214, 0.25);
+  transform: translateY(-2px);
+}
+
+.outline-button {
+  border: 2px solid #1588d6;
+  color: #1588d6;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 900;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.outline-button:hover {
+  background-color: #1588d6;
+  color: white;
+}
+
+.field {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #91d8ff;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.field:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px #1588d6;
+}
+
+/* Toast notification */
+.app-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #1a202c;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.app-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Role navigation */
+.role-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.role-nav-link {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #4a5568;
+  transition: all 0.2s ease;
+}
+
+.role-nav-link:hover {
+  background-color: #e2e8f0;
+  color: #1a202c;
+}
+
+.role-nav-link.active {
+  background-color: #1588d6;
+  color: white;
+}
+
+.role-nav-link[data-logout] {
+  background: transparent;
+  border: 2px solid #e53e3e;
+  color: #e53e3e;
+}
+
+.role-nav-link[data-logout]:hover {
+  background-color: #e53e3e;
+  color: white;
+}
+
+/* Chart styles */
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  height: 220px;
+  gap: 1.5rem;
+  padding: 0 1rem 3rem 1rem;
+  margin-top: 2rem;
+}
+
+.bar-chart span {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.bar-chart span::before {
+  content: '';
+  width: 100%;
+  max-width: 60px;
+  background: linear-gradient(180deg, #22b887 0%, #1588d6 100%);
+  border-radius: 12px;
+  height: var(--value);
+  box-shadow: 0 4px 15px rgba(21, 136, 214, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: bottom;
+  animation: growBar 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.bar-chart span:hover::before {
+  transform: scaleX(1.05);
+  box-shadow: 0 8px 30px rgba(34, 184, 135, 0.4);
+  filter: brightness(1.1);
+}
+
+@keyframes growBar {
+  0% { transform: scaleY(0); }
+  100% { transform: scaleY(1); }
+}
+
+.bar-chart b {
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #0f172a;
+  opacity: 0;
+  animation: fadeIn 0.4s ease forwards 0.8s;
+}
+
+.bar-chart em {
+  position: absolute;
+  bottom: -2.5rem;
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}

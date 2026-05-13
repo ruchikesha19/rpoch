@@ -42,7 +42,7 @@ const Rewards = () => {
     }
 
     try {
-      const response = await api.post('/api/redeem', {
+      const response = await api.post('/redeem', {
         user_id: currentUser.user_id,
         cost: reward.cost,
         reward_name: reward.name

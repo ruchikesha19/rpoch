@@ -16,6 +16,7 @@ const Volunteers = () => {
     total_points: 0,
     pickups: []
   });
+  const [userLocation, setUserLocation] = useState(null);
   const [toast, setToast] = useState({ show: false, message: '' });
   const socketRef = useRef(null);
   const locationIntervalRef = useRef(null);
@@ -47,6 +48,7 @@ const Volunteers = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
           setMapUrl(`https://www.google.com/maps?q=${latitude},${longitude}&output=embed`);
         }
       );
@@ -100,10 +102,26 @@ const Volunteers = () => {
     };
   }, [currentUser, volunteerData.pickups]);
 
+  // Helper: Calculate distance between two coordinates in km
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return (R * c).toFixed(1);
+  };
+
   const handleAcceptPickup = async (pickupId) => {
     try {
       const response = await api.post(`/pickups/${pickupId}/accept`, {
-        volunteer_id: currentUser.user_id
+        volunteer_id: currentUser.user_id,
+        volunteer_lat: userLocation?.lat,
+        volunteer_lng: userLocation?.lng
       });
       const { points_earned } = response.data;
       setToast({ show: true, message: `+${points_earned} points earned! Redirecting to delivery details...` });
@@ -176,18 +194,20 @@ const Volunteers = () => {
                 pickups.map((pickup) => (
                   <article key={pickup._id} className="lift-card flex items-center justify-between gap-4 rounded-lg border border-ocean-100 bg-white p-5 max-sm:flex-col max-sm:items-start animate-fade-in">
                     <div>
-                      {pickup.distance_km >= 20 && (
+                      {parseFloat(getDistance(userLocation?.lat, userLocation?.lng, pickup.lat, pickup.lng)) >= 20 && (
                         <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-coral">Long Distance</span>
                       )}
                       <h3 className="mt-3 text-lg font-black text-ocean-950">{pickup.quantity} {pickup.food_type}, {pickup.restaurant_name}</h3>
-                      <p className="mt-1 text-slate-600">{pickup.location} - {pickup.distance_km} km route</p>
+                      <p className="mt-1 text-slate-600">
+                        {pickup.location} - {userLocation ? `${getDistance(userLocation.lat, userLocation.lng, pickup.lat, pickup.lng)} km away` : `${pickup.distance_km} km away`}
+                      </p>
                     </div>
                     <button 
                       className="outline-button" 
                       type="button"
                       onClick={() => handleAcceptPickup(pickup._id)}
                     >
-                      Accept ({pickup.distance_km}km)
+                      Accept ({userLocation ? `${getDistance(userLocation.lat, userLocation.lng, pickup.lat, pickup.lng)}km` : `${pickup.distance_km}km`})
                     </button>
                   </article>
                 ))
@@ -217,6 +237,7 @@ const Volunteers = () => {
             </div>
             
             <div className="mt-5 grid gap-3">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Active Missions</h3>
               {volunteerData.pickups.filter(p => p.status === 'accepted').length > 0 ? (
                 volunteerData.pickups.filter(p => p.status === 'accepted').map((pickup) => (
                   <div 
@@ -229,7 +250,7 @@ const Volunteers = () => {
                         <p className="font-black text-ocean-950">{pickup.restaurant_name}</p>
                         <p className="text-sm text-slate-600">{pickup.quantity} {pickup.food_type} - {pickup.location}</p>
                       </div>
-                      <span className="text-xs font-black text-ocean-400 uppercase tracking-widest group-hover:text-ocean-600 transition">View Details →</span>
+                      <span className="text-xs font-black text-ocean-400 uppercase tracking-widest group-hover:text-ocean-600 transition">Track →</span>
                     </div>
                     <span className="mt-2 inline-block rounded-full bg-mint-100 px-2 py-1 text-xs font-black text-mint-700 uppercase tracking-wider">
                       {pickup.status}
@@ -237,7 +258,33 @@ const Volunteers = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-sm font-bold text-slate-500 italic">No active deliveries. Accept a pickup from the board above!</p>
+                <p className="text-xs font-bold text-slate-500 italic mb-4">No active deliveries.</p>
+              )}
+
+              {volunteerData.pickups.filter(p => p.status === 'completed').length > 0 && (
+                <>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mt-4 mb-1">Recently Completed</h3>
+                  {volunteerData.pickups
+                    .filter(p => p.status === 'completed')
+                    .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
+                    .slice(0, 3)
+                    .map((pickup) => (
+                      <div 
+                        key={pickup._id} 
+                        onClick={() => navigate(`/invoice/${pickup._id}`)}
+                        className="rounded-lg p-4 border border-slate-100 bg-slate-50/50 transition-all duration-200 cursor-pointer hover:bg-white hover:shadow-md hover:border-ocean-200"
+                      >
+                        <div className="flex justify-between items-start opacity-70">
+                          <div>
+                            <p className="font-black text-slate-700">{pickup.restaurant_name}</p>
+                            <p className="text-xs text-slate-500">{pickup.quantity} {pickup.food_type}</p>
+                          </div>
+                          <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">Completed ✓</span>
+                        </div>
+                      </div>
+                    ))
+                  }
+                </>
               )}
             </div>
           </article>

@@ -19,6 +19,7 @@ const Tracker = () => {
   const [toast, setToast] = useState({ show: false, message: '' });
   const [pickupData, setPickupData] = useState(null);
   const socketRef = useRef(null);
+  const pickupDataRef = useRef(null);
 
   const RESTAURANT_LOC = { lat: 12.9716, lng: 77.5946 };
 
@@ -27,6 +28,7 @@ const Tracker = () => {
       const response = await api.get(`/restaurants/${currentUser.user_id}/pickups`);
       const current = response.data.pickups.find(p => p._id === id);
       setPickupData(current);
+      pickupDataRef.current = current;
     } catch (error) {
       console.error('Error fetching pickup:', error);
     }
@@ -45,12 +47,15 @@ const Tracker = () => {
         setLocation({ lat: data.lat, lng: data.lng });
         setVolunteerName(data.volunteer_name || 'Volunteer');
         
+        const destLat = pickupDataRef.current?.lat || 12.9716;
+        const destLng = pickupDataRef.current?.lng || 77.5946;
+        
         const R = 6371; 
-        const dLat = (RESTAURANT_LOC.lat - data.lat) * Math.PI / 180;
-        const dLon = (RESTAURANT_LOC.lng - data.lng) * Math.PI / 180;
+        const dLat = (destLat - data.lat) * Math.PI / 180;
+        const dLon = (destLng - data.lng) * Math.PI / 180;
         const a = 
           Math.sin(dLat/2) * Math.sin(dLat/2) +
-          Math.cos(data.lat * Math.PI / 180) * Math.cos(RESTAURANT_LOC.lat * Math.PI / 180) * 
+          Math.cos(data.lat * Math.PI / 180) * Math.cos(destLat * Math.PI / 180) * 
           Math.sin(dLon/2) * Math.sin(dLon/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         const distanceKm = R * c;

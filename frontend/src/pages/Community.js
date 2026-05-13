@@ -35,7 +35,7 @@ const Community = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get('/api/community-stats');
+        const response = await api.get('/community-stats');
         setStats(response.data);
       } catch (error) {
         console.error('Error fetching community stats:', error);

@@ -39,7 +39,7 @@ const Delivery = () => {
 
     setIsUploading(true);
     try {
-      await api.put(`/api/pickups/${id}/complete`, {
+      await api.put(`/pickups/${id}/complete`, {
         delivery_photo: photo
       });
       

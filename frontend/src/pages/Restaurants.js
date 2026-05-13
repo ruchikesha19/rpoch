@@ -32,6 +32,8 @@ const Restaurants = () => {
   const [showMap, setShowMap] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '' });
   const socketRef = useRef(null);
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
 
   // Sync location if currentUser changes (e.g. after login/register)
   useEffect(() => {
@@ -228,6 +230,57 @@ const Restaurants = () => {
       default: return 'bg-slate-100 text-slate-700';
     }
   };
+
+  // Leaflet Map Initialization
+  useEffect(() => {
+    if (showMap && !mapRef.current) {
+      setTimeout(() => {
+        const L = window.L;
+        if (!L) return;
+
+        const map = L.map('map-picker').setView([formData.lat, formData.lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        const marker = L.marker([formData.lat, formData.lng], {
+          draggable: true
+        }).addTo(map);
+
+        const updateLocation = async (lat, lng) => {
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await res.json();
+            const address = data.display_name.split(',').slice(0, 3).join(',');
+            setFormData(prev => ({ ...prev, lat, lng, location: address || `Pin at ${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
+          } catch (err) {
+            setFormData(prev => ({ ...prev, lat, lng, location: `Pin at ${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
+          }
+        };
+
+        marker.on('dragend', (e) => {
+          const { lat, lng } = e.target.getLatLng();
+          updateLocation(lat, lng);
+        });
+
+        map.on('click', (e) => {
+          const { lat, lng } = e.latlng;
+          marker.setLatLng([lat, lng]);
+          updateLocation(lat, lng);
+        });
+
+        mapRef.current = map;
+        markerRef.current = marker;
+      }, 100);
+    }
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [showMap]);
 
   return (
     <div className="bg-ocean-50 font-sans text-ocean-950 antialiased">
@@ -565,44 +618,63 @@ const Restaurants = () => {
               <button onClick={() => setShowMap(false)} className="h-8 w-8 rounded-full bg-ocean-50 text-ocean-400 hover:bg-ocean-100 transition">✕</button>
             </div>
             <div className="relative h-[400px] bg-ocean-100">
-               {/* Mock Map View */}
-               <iframe 
-                src={`https://www.google.com/maps?q=${formData.lat},${formData.lng}&z=15&output=embed`}
-                className="h-full w-full grayscale-[20%]"
-                title="Map Picker"
-               />
-               <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                  <div className="h-10 w-10 text-mint-500 animate-bounce">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>
-                  </div>
+               <div id="map-picker" className="h-full w-full z-10" />
+               <div className="absolute top-4 right-4 z-[20] bg-white/90 p-2 rounded-lg shadow-md border border-ocean-100">
+                  <p className="text-[10px] font-black uppercase text-ocean-950">Drag pin to update spot</p>
                </div>
             </div>
             <div className="p-6">
-              <p className="text-xs font-bold text-slate-500 mb-4">Select a common pickup location for this order.</p>
-              <div className="grid grid-cols-2 gap-3">
-                 <button 
+              <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Search or Enter Location</p>
+              <div className="relative mb-8">
+                <input 
+                  className="w-full bg-ocean-50 border-2 border-ocean-100 rounded-xl p-4 text-sm font-bold text-ocean-950 focus:border-mint-500 focus:outline-none pr-12"
+                  type="text"
+                  placeholder="e.g. REVA University, Bengaluru"
+                  value={formData.location}
+                  onChange={(e) => setFormData({...formData, location: e.target.value})}
+                />
+                <button 
+                  className="absolute right-3 top-3 h-10 w-10 bg-white border border-ocean-100 rounded-lg flex items-center justify-center text-mint-600 hover:shadow-md transition-all"
                   onClick={() => {
-                    setFormData({...formData, lat: 12.9716, lng: 77.5946, location: 'Front Entrance, Main St'});
-                    setShowMap(false);
+                    setToast({ show: true, message: 'Searching location...' });
+                    setTimeout(() => setToast({ show: false, message: '' }), 1500);
                   }}
-                  className="rounded-xl border border-ocean-100 p-4 text-left hover:bg-ocean-50 transition group"
-                 >
-                   <p className="text-[10px] font-black uppercase text-slate-400 group-hover:text-mint-600">Gate A</p>
-                   <p className="text-sm font-bold">Main Entrance</p>
-                 </button>
-                 <button 
-                  onClick={() => {
-                    setFormData({...formData, lat: 12.9352, lng: 77.6245, location: 'Back Loading Dock, Lane 2'});
-                    setShowMap(false);
-                  }}
-                  className="rounded-xl border border-ocean-100 p-4 text-left hover:bg-ocean-50 transition group"
-                 >
-                   <p className="text-[10px] font-black uppercase text-slate-400 group-hover:text-mint-600">Gate B</p>
-                   <p className="text-sm font-bold">Loading Area</p>
-                 </button>
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                </button>
               </div>
+
+              <div className="flex justify-center mb-8">
+                <button 
+                  onClick={() => {
+                    if (navigator.geolocation) {
+                      setToast({ show: true, message: '🛰️ Pinging satellite...' });
+                      navigator.geolocation.getCurrentPosition((position) => {
+                        setFormData({
+                          ...formData,
+                          lat: position.coords.latitude,
+                          lng: position.coords.longitude,
+                          location: 'My Current Location'
+                        });
+                        setToast({ show: true, message: '📍 Location pinned!' });
+                        setTimeout(() => setToast({ show: false, message: '' }), 2000);
+                      });
+                    }
+                  }}
+                  className="flex items-center gap-2 rounded-xl bg-mint-50 px-8 py-3 text-xs font-black uppercase tracking-widest text-mint-700 hover:bg-mint-100 transition shadow-sm border border-mint-200"
+                >
+                  <span className="text-lg">📍</span> Pin My Current Location
+                </button>
+              </div>
+
+              <button 
+                onClick={() => setShowMap(false)}
+                className="w-full bg-ocean-950 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-[0.3em] shadow-xl hover:bg-black transition-all hover:-translate-y-1 active:translate-y-0"
+              >
+                Confirm Pickup Point
+              </button>
             </div>
           </div>
         </div>

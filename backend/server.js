@@ -29,7 +29,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
-    seedData();
+
   })
   .catch(err => console.error('❌ MongoDB error:', err));
 
@@ -55,57 +55,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// Sample Data Seeding
-async function seedData() {
-  try {
-    // 1. Ensure a sample restaurant exists
-    let restaurant = await User.findOne({ user_type: 'restaurant' });
-    if (!restaurant) {
-      restaurant = await User.create({
-        name: 'Dominos Pizza',
-        email: 'dominos@test.com',
-        password: 'password123',
-        user_type: 'restaurant'
-      });
-      console.log('🌱 Sample restaurant created');
-    }
-
-    // 2. Seed pickups if empty
-    const count = await Pickup.countDocuments();
-    if (count === 0) {
-      const samplePickups = [
-        { 
-          restaurant_id: restaurant._id,
-          restaurant_name: 'Dominos', 
-          food_type: 'Pizza', 
-          location: 'Whitefield', 
-          quantity: '10 boxes', 
-          distance_km: 3 
-        },
-        { 
-          restaurant_id: restaurant._id,
-          restaurant_name: 'KFC', 
-          food_type: 'Chicken', 
-          location: 'Marathahalli', 
-          quantity: '5 buckets', 
-          distance_km: 8 
-        },
-        { 
-          restaurant_id: restaurant._id,
-          restaurant_name: 'Empire', 
-          food_type: 'Biryani', 
-          location: 'Indiranagar', 
-          quantity: '20 plates', 
-          distance_km: 12 
-        }
-      ];
-      await Pickup.insertMany(samplePickups);
-      console.log('🌱 Sample pickups seeded');
-    }
-  } catch (error) {
-    console.error('Error seeding data:', error);
-  }
-}
 
 // Helper: Calculate points based on distance
 const calculatePoints = (km) => {
@@ -239,8 +188,18 @@ app.get('/api/pickups', async (req, res) => {
   }
 });
 
+app.get('/api/pickups/:id', async (req, res) => {
+  try {
+    const pickup = await Pickup.findById(req.params.id);
+    if (!pickup) return res.status(404).json({ error: 'Pickup not found' });
+    res.json(pickup);
+  } catch (error) {
+    res.status(500).json({ error: 'Error' });
+  }
+});
+
 app.post('/api/pickups/:id/accept', async (req, res) => {
-  const { volunteer_id } = req.body;
+  const { volunteer_id, volunteer_lat, volunteer_lng } = req.body;
   const { id } = req.params;
   if (!volunteer_id) return res.status(400).json({ error: 'ID required' });
 
@@ -250,10 +209,24 @@ app.post('/api/pickups/:id/accept', async (req, res) => {
       return res.status(400).json({ error: 'Invalid pickup' });
     }
 
-    const pointsEarned = calculatePoints(pickup.distance_km);
+    // Calculate real distance if coordinates are provided
+    let realDistance = pickup.distance_km;
+    if (volunteer_lat && volunteer_lng && pickup.lat && pickup.lng) {
+      const R = 6371;
+      const dLat = (pickup.lat - volunteer_lat) * Math.PI / 180;
+      const dLon = (pickup.lng - volunteer_lng) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(volunteer_lat * Math.PI / 180) * Math.cos(pickup.lat * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      realDistance = R * c;
+      pickup.distance_km = realDistance;
+    }
+
+    const pointsEarned = calculatePoints(realDistance);
     pickup.status = 'accepted';
     pickup.assigned_to = new mongoose.Types.ObjectId(volunteer_id);
-    // Generate a random 4-digit OTP for secure collection
     pickup.otp = Math.floor(1000 + Math.random() * 9000).toString(); 
     await pickup.save();
 
@@ -305,7 +278,11 @@ app.put('/api/pickups/:id/complete', async (req, res) => {
         const base64Data = delivery_photo.replace(/^data:image\/\w+;base64,/, "");
         const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
         const fileName = `delivery_${req.params.id}_${timestamp}.png`;
-        const filePath = path.join(__dirname, 'uploads', fileName);
+        const uploadDir = path.join(__dirname, 'uploads');
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        const filePath = path.join(uploadDir, fileName);
 
         fs.writeFileSync(filePath, base64Data, 'base64');
         finalPhotoPath = `http://localhost:5000/uploads/${fileName}`;
